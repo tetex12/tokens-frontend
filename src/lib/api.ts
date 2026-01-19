@@ -7,6 +7,20 @@ import { config } from './config';
 const baseURL = config.apiUrl;
 
 /**
+ * Handle API response errors
+ * @param response - The fetch response object
+ * @param endpoint - The API endpoint that was called
+ */
+async function handleResponse<T>(response: Response, endpoint: string): Promise<T> {
+  if (!response.ok) {
+    throw new Error(
+      `API request failed: ${response.status} ${response.statusText} - ${endpoint}`
+    );
+  }
+  return response.json();
+}
+
+/**
  * Make a GET request to the API
  * @param endpoint - The API endpoint to call
  * @returns Promise with the response data
@@ -20,11 +34,7 @@ export async function get<T>(endpoint: string): Promise<T> {
     },
   });
 
-  if (!response.ok) {
-    throw new Error(`API request failed: ${response.statusText}`);
-  }
-
-  return response.json();
+  return handleResponse<T>(response, endpoint);
 }
 
 /**
@@ -43,11 +53,7 @@ export async function post<T>(endpoint: string, data: unknown): Promise<T> {
     body: JSON.stringify(data),
   });
 
-  if (!response.ok) {
-    throw new Error(`API request failed: ${response.statusText}`);
-  }
-
-  return response.json();
+  return handleResponse<T>(response, endpoint);
 }
 
 /**
@@ -66,11 +72,7 @@ export async function put<T>(endpoint: string, data: unknown): Promise<T> {
     body: JSON.stringify(data),
   });
 
-  if (!response.ok) {
-    throw new Error(`API request failed: ${response.statusText}`);
-  }
-
-  return response.json();
+  return handleResponse<T>(response, endpoint);
 }
 
 /**
@@ -87,9 +89,5 @@ export async function del<T>(endpoint: string): Promise<T> {
     },
   });
 
-  if (!response.ok) {
-    throw new Error(`API request failed: ${response.statusText}`);
-  }
-
-  return response.json();
+  return handleResponse<T>(response, endpoint);
 }

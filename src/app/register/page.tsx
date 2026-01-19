@@ -16,7 +16,7 @@ export default function RegisterPage() {
       console.error('Passwords do not match');
       return;
     }
-    console.log('Registration attempt:', { name, email, password });
+    console.log('Registration attempt:', { name, email });
   };
 
   return (
