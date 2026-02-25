@@ -15,17 +15,20 @@ export default function DuelPage() {
     setMessage("Criando match...");
 
     try {
-      const res = await fetch("http://localhost:3000/matches", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          player1Id,
-          player2Id,
-          betAmount: Number(betAmount),
-        }),
-      });
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/matches`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            player1Id,
+            player2Id,
+            betAmount: Number(betAmount),
+          }),
+        }
+      );
 
       const data = await res.json();
 
@@ -93,8 +96,8 @@ export default function DuelPage() {
                 onChange={(e) => setRule(e.target.value)}
                 className="mt-2 w-full rounded-xl bg-black/40 border border-white/20 px-4 py-3"
               >
-                <option>FT5</option>
-                <option>FT7</option>
+                <option value="FT5">FT5</option>
+                <option value="FT7">FT7</option>
               </select>
             </div>
 
