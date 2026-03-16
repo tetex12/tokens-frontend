@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Brand } from "../../src/components/Brand";
+import { Brand } from "@/components/Brand";
 import { useAuth } from "../../src/components/context/AuthContext";
 
 export default function RegisterPage() {

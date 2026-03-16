@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Brand } from "@/src/components/Brand";
+import { Brand } from "@/components/Brand";
 
 export default function Home() {
   return (

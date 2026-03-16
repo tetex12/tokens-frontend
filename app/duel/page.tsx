@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Brand } from "../../src/components/Brand";
+import { Brand } from "@/components/Brand";
 import { useAuth } from "../../src/components/context/AuthContext";
 import { useRouter } from "next/navigation";
 
