@@ -43,9 +43,9 @@ export default function LoginPage() {
       }
 
       const token =
-      data?.accessToken ||
-      data?.token ||
-      data?.access_token;
+        data?.accessToken ||
+        data?.token ||
+        data?.access_token;
 
       if (!token) {
         setMessage("Token não recebido");
@@ -53,13 +53,20 @@ export default function LoginPage() {
         return;
       }
 
-      // agora usamos o AuthContext
+      // salva token no AuthContext
       login(token);
 
       setMessage("Login realizado 🚀");
 
       setTimeout(() => {
-        router.push("/dashboard");
+
+        // verifica se usuário conectou Epic
+        if (data?.user?.epicConnected === false) {
+          router.push("/connect-epic");
+        } else {
+          router.push("/dashboard");
+        }
+
       }, 700);
 
     } catch (error) {
