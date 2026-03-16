@@ -56,7 +56,7 @@ export default function RegisterPage() {
       setMessage("Conta criada com sucesso 🚀");
 
       setTimeout(() => {
-        router.push("/duel");
+        router.push("/dashboard");
       }, 700);
 
     } catch (error) {

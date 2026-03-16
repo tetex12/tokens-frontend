@@ -55,7 +55,7 @@ export default function LoginPage() {
       setMessage("Login realizado 🚀");
 
       setTimeout(() => {
-        router.push("/duel");
+        router.push("/dashboard");
       }, 700);
 
     } catch (error) {
