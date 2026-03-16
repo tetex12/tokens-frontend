@@ -5,49 +5,65 @@ import Link from "next/link";
 import { Brand } from "@/src/components/Brand";
 
 export default function DuelPage() {
-  const [player1Id, setPlayer1Id] = useState("");
+
   const [player2Id, setPlayer2Id] = useState("");
   const [betAmount, setBetAmount] = useState("");
   const [rule, setRule] = useState("FT5");
   const [message, setMessage] = useState("");
 
   async function handleCreateMatch() {
+
     setMessage("Criando match...");
 
     try {
+
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        setMessage("Você precisa estar logado.");
+        return;
+      }
+
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/matches`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({
-            player1Id,
             player2Id,
             betAmount: Number(betAmount),
+            ruleSet: rule,
           }),
         }
       );
 
-      const data = await res.json();
+      const data = await res.json().catch(() => null);
 
       if (!res.ok) {
-        setMessage(data.message || "Erro ao criar match");
+        setMessage(data?.message || "Erro ao criar match");
         return;
       }
 
       setMessage("Match criado com sucesso 🔥");
-      console.log(data);
+
+      console.log("MATCH:", data);
 
     } catch (err) {
+
+      console.error(err);
       setMessage("Erro de conexão com API");
+
     }
   }
 
   return (
     <div className="min-h-screen bg-zinc-950 text-white px-6 py-10">
+
       <div className="max-w-3xl mx-auto">
+
         <div className="flex items-center justify-between mb-10">
           <Brand />
           <Link href="/" className="text-white/70 hover:text-white">
@@ -60,19 +76,13 @@ export default function DuelPage() {
         </h2>
 
         <div className="mt-8 bg-white/10 border border-white/20 rounded-2xl p-6">
+
           <div className="grid md:grid-cols-2 gap-4">
 
             <div>
-              <label className="text-sm text-white/70">Player 1 ID</label>
-              <input
-                value={player1Id}
-                onChange={(e) => setPlayer1Id(e.target.value)}
-                className="mt-2 w-full rounded-xl bg-black/40 border border-white/20 px-4 py-3 outline-none"
-              />
-            </div>
-
-            <div>
-              <label className="text-sm text-white/70">Player 2 ID</label>
+              <label className="text-sm text-white/70">
+                Player 2 ID
+              </label>
               <input
                 value={player2Id}
                 onChange={(e) => setPlayer2Id(e.target.value)}
@@ -81,7 +91,9 @@ export default function DuelPage() {
             </div>
 
             <div>
-              <label className="text-sm text-white/70">Bet (R$)</label>
+              <label className="text-sm text-white/70">
+                Bet (R$)
+              </label>
               <input
                 value={betAmount}
                 onChange={(e) => setBetAmount(e.target.value)}
@@ -89,8 +101,10 @@ export default function DuelPage() {
               />
             </div>
 
-            <div>
-              <label className="text-sm text-white/70">Regra</label>
+            <div className="md:col-span-2">
+              <label className="text-sm text-white/70">
+                Regra
+              </label>
               <select
                 value={rule}
                 onChange={(e) => setRule(e.target.value)}
@@ -111,10 +125,15 @@ export default function DuelPage() {
           </button>
 
           {message && (
-            <p className="mt-4 text-center text-white/80">{message}</p>
+            <p className="mt-4 text-center text-white/80">
+              {message}
+            </p>
           )}
+
         </div>
+
       </div>
+
     </div>
   );
 }
