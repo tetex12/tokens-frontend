@@ -42,10 +42,14 @@ export default function LoginPage() {
         return;
       }
 
-      const token = data?.accessToken;
+      const token =
+      data?.accessToken ||
+      data?.token ||
+      data?.access_token;
 
       if (!token) {
         setMessage("Token não recebido");
+        console.log("LOGIN RESPONSE:", data);
         return;
       }
 
