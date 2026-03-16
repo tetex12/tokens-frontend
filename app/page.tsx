@@ -44,7 +44,7 @@ export default function Home() {
 
             {/* DISCORD */}
             <a
-              href="https://discord.gg/SEU_LINK"
+              href="https://discord.gg/arenatokens"
               target="_blank"
               rel="noopener noreferrer"
               className="px-8 py-4 rounded-2xl bg-white/15 border border-white/25 hover:bg-white/25 transition-all duration-200 text-white font-semibold"

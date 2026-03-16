@@ -6,30 +6,34 @@ import Link from "next/link";
 import { Brand } from "../../src/components/Brand";
 import { useAuth } from "../../src/components/context/AuthContext";
 
-export default function LoginPage() {
+export default function RegisterPage() {
 
   const router = useRouter();
   const { login } = useAuth();
 
+  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
+  const [cpf, setCpf] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
 
-  async function handleLogin() {
+  async function handleRegister() {
 
-    setMessage("Entrando...");
+    setMessage("Criando conta...");
 
     try {
 
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/auth/login`,
+        `${process.env.NEXT_PUBLIC_API_URL}/auth/register`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
+            username,
             email,
+            cpf,
             password,
           }),
         }
@@ -38,21 +42,18 @@ export default function LoginPage() {
       const data = await res.json().catch(() => null);
 
       if (!res.ok) {
-        setMessage(data?.message || "Erro no login");
+        setMessage(data?.message || "Erro ao registrar");
         return;
       }
 
       const token = data?.accessToken;
 
-      if (!token) {
-        setMessage("Token não recebido");
-        return;
+      // login automático após registrar
+      if (token) {
+        login(token);
       }
 
-      // agora usamos o AuthContext
-      login(token);
-
-      setMessage("Login realizado 🚀");
+      setMessage("Conta criada com sucesso 🚀");
 
       setTimeout(() => {
         router.push("/duel");
@@ -79,10 +80,21 @@ export default function LoginPage() {
         <div className="bg-white/10 border border-white/20 rounded-2xl p-8">
 
           <h2 className="text-3xl font-black mb-6 text-center">
-            Login
+            Criar Conta
           </h2>
 
           <div className="space-y-4">
+
+            <div>
+              <label className="text-sm text-white/70">
+                Username
+              </label>
+              <input
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                className="mt-2 w-full rounded-xl bg-black/40 border border-white/20 px-4 py-3 outline-none"
+              />
+            </div>
 
             <div>
               <label className="text-sm text-white/70">
@@ -92,6 +104,17 @@ export default function LoginPage() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                className="mt-2 w-full rounded-xl bg-black/40 border border-white/20 px-4 py-3 outline-none"
+              />
+            </div>
+
+            <div>
+              <label className="text-sm text-white/70">
+                CPF
+              </label>
+              <input
+                value={cpf}
+                onChange={(e) => setCpf(e.target.value)}
                 className="mt-2 w-full rounded-xl bg-black/40 border border-white/20 px-4 py-3 outline-none"
               />
             </div>
@@ -111,10 +134,10 @@ export default function LoginPage() {
           </div>
 
           <button
-            onClick={handleLogin}
+            onClick={handleRegister}
             className="mt-6 w-full rounded-2xl bg-gradient-to-r from-cyan-400 to-purple-500 text-black font-extrabold py-4 hover:scale-105 transition-all"
           >
-            Entrar
+            Criar Conta
           </button>
 
           {message && (
@@ -124,9 +147,9 @@ export default function LoginPage() {
           )}
 
           <div className="mt-6 text-center text-white/60 text-sm">
-            Não tem conta?{" "}
-            <Link href="/register" className="text-cyan-400">
-              Registrar
+            Já tem conta?{" "}
+            <Link href="/login" className="text-cyan-400">
+              Fazer login
             </Link>
           </div>
 

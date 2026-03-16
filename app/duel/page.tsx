@@ -1,23 +1,32 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Brand } from "@/src/components/Brand";
+import { Brand } from "../../src/components/Brand";
+import { useAuth } from "../../src/components/context/AuthContext";
+import { useRouter } from "next/navigation";
 
 export default function DuelPage() {
+
+  const { token, isAuthenticated } = useAuth();
+  const router = useRouter();
 
   const [player2Id, setPlayer2Id] = useState("");
   const [betAmount, setBetAmount] = useState("");
   const [rule, setRule] = useState("FT5");
   const [message, setMessage] = useState("");
 
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.push("/login");
+    }
+  }, [isAuthenticated, router]);
+
   async function handleCreateMatch() {
 
     setMessage("Criando match...");
 
     try {
-
-      const token = localStorage.getItem("token");
 
       if (!token) {
         setMessage("Você precisa estar logado.");
