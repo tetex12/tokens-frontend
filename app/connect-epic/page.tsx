@@ -4,9 +4,28 @@ import { Brand } from "@/components/Brand";
 
 export default function ConnectEpicPage() {
 
-  function connectEpic() {
-    window.location.href =
-      `${process.env.NEXT_PUBLIC_API_URL}/auth/epic`;
+  async function connectEpic() {
+
+    try {
+
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/auth/epic`
+      );
+
+      const data = await res.json();
+
+      if (data?.url) {
+        window.location.href = data.url;
+      } else {
+        console.error("URL Epic não recebida:", data);
+      }
+
+    } catch (error) {
+
+      console.error("Erro ao iniciar OAuth Epic:", error);
+
+    }
+
   }
 
   return (
@@ -21,7 +40,7 @@ export default function ConnectEpicPage() {
         <div className="bg-white/10 border border-white/20 rounded-2xl p-8 text-center">
 
           <h2 className="text-3xl font-black mb-4">
-            Conectar conta Epic Games
+            Conectar com a Epic Games
           </h2>
 
           <p className="text-white/70 mb-6">
