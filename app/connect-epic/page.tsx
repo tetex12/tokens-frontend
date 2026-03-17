@@ -9,7 +9,7 @@ export default function ConnectEpicPage() {
     try {
 
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/auth/epic`
+        `${process.env.NEXT_PUBLIC_API_URL}/api/auth/epic`
       );
 
       const data = await res.json();
