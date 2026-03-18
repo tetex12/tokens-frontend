@@ -1,44 +1,83 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Brand } from "@/components/Brand";
+import { useAuth } from "../../src/components/context/AuthContext";
 
 export default function ConnectEpicPage() {
+  const router = useRouter();
+  const { isAuthenticated } = useAuth();
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
+
+  useEffect(() => {
+    const token =
+      typeof window !== "undefined"
+        ? localStorage.getItem("token")
+        : null;
+
+    if (!token && !isAuthenticated) {
+      router.replace("/login");
+    }
+  }, [isAuthenticated, router]);
 
   async function connectEpic() {
+    if (loading) return;
 
     try {
+      setLoading(true);
+      setMessage("Redirecionando para a Epic...");
+
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        setMessage("Sessão expirada. Faça login novamente.");
+        router.replace("/login");
+        return;
+      }
 
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/auth/epic`
+        `${process.env.NEXT_PUBLIC_API_URL}/api/auth/epic`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
 
-      const data = await res.json();
+      const data = await res.json().catch(() => null);
+
+      if (!res.ok) {
+        setMessage(data?.message || "Erro ao iniciar conexão com a Epic");
+        setLoading(false);
+        return;
+      }
 
       if (data?.url) {
         window.location.href = data.url;
-      } else {
-        console.error("URL Epic não recebida:", data);
+        return;
       }
 
+      console.error("URL Epic não recebida:", data);
+      setMessage("URL da Epic não recebida");
+      setLoading(false);
     } catch (error) {
-
       console.error("Erro ao iniciar OAuth Epic:", error);
-
+      setMessage("Erro ao iniciar OAuth Epic");
+      setLoading(false);
     }
-
   }
 
   return (
     <div className="min-h-screen bg-zinc-950 text-white flex items-center justify-center px-6">
-
       <div className="w-full max-w-md">
-
         <div className="flex justify-center mb-10">
           <Brand />
         </div>
 
         <div className="bg-white/10 border border-white/20 rounded-2xl p-8 text-center">
-
           <h2 className="text-3xl font-black mb-4">
             Conectar com a Epic Games
           </h2>
@@ -49,15 +88,19 @@ export default function ConnectEpicPage() {
 
           <button
             onClick={connectEpic}
-            className="w-full rounded-2xl bg-gradient-to-r from-cyan-400 to-purple-500 text-black font-extrabold py-4 hover:scale-105 transition-all"
+            disabled={loading}
+            className="w-full rounded-2xl bg-gradient-to-r from-cyan-400 to-purple-500 text-black font-extrabold py-4 hover:scale-105 transition-all disabled:opacity-70 disabled:hover:scale-100"
           >
-            Conectar Epic Games
+            {loading ? "Redirecionando..." : "Conectar Epic Games"}
           </button>
 
+          {message && (
+            <p className="mt-4 text-center text-white/80">
+              {message}
+            </p>
+          )}
         </div>
-
       </div>
-
     </div>
   );
 }
