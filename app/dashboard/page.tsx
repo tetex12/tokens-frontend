@@ -25,7 +25,7 @@ export default function DashboardPage() {
         const token = localStorage.getItem("token");
 
         if (!token) {
-          router.push("/login");
+          router.replace("/login");
           return;
         }
 
@@ -40,7 +40,7 @@ export default function DashboardPage() {
 
         if (!res.ok) {
           localStorage.removeItem("token");
-          router.push("/login");
+          router.replace("/login");
           return;
         }
 
@@ -48,12 +48,16 @@ export default function DashboardPage() {
 
         if (!data) {
           localStorage.removeItem("token");
-          router.push("/login");
+          router.replace("/login");
           return;
         }
 
-        if (!data?.epicConnected) {
-          router.push("/connect-epic");
+        const epicConnected =
+          data?.epicConnected ??
+          !!data?.epicId;
+
+        if (!epicConnected) {
+          router.replace("/connect-epic");
           return;
         }
 
@@ -61,7 +65,7 @@ export default function DashboardPage() {
       } catch (error) {
         console.error("Erro verificando Epic:", error);
         localStorage.removeItem("token");
-        router.push("/login");
+        router.replace("/login");
       }
     }
 
@@ -69,12 +73,13 @@ export default function DashboardPage() {
   }, [router, searchParams]);
 
   useEffect(() => {
-    const token = typeof window !== "undefined"
-      ? localStorage.getItem("token")
-      : null;
+    const token =
+      typeof window !== "undefined"
+        ? localStorage.getItem("token")
+        : null;
 
     if (!token && !isAuthenticated) {
-      router.push("/login");
+      router.replace("/login");
     }
   }, [isAuthenticated, router]);
 
@@ -97,7 +102,7 @@ export default function DashboardPage() {
             onClick={() => {
               localStorage.removeItem("token");
               logout();
-              router.push("/");
+              router.replace("/");
             }}
             className="text-sm bg-red-500 px-4 py-2 rounded-lg hover:bg-red-600 transition"
           >
