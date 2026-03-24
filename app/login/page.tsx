@@ -1,7 +1,7 @@
 // app/login/page.tsx
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Brand } from "@/components/Brand";
@@ -9,18 +9,29 @@ import { useAuth } from "../../src/components/context/AuthContext";
 
 export default function LoginPage() {
   const router = useRouter();
-  const { login, isAuthenticated } = useAuth();
+  const { login } = useAuth();
+  const hasRedirectedRef = useRef(false);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
+  const [checkingSession, setCheckingSession] = useState(true);
 
   useEffect(() => {
-    if (isAuthenticated) {
+    const token =
+      typeof window !== "undefined"
+        ? localStorage.getItem("token")
+        : null;
+
+    if (token && !hasRedirectedRef.current) {
+      hasRedirectedRef.current = true;
       router.replace("/dashboard");
+      return;
     }
-  }, [isAuthenticated, router]);
+
+    setCheckingSession(false);
+  }, [router]);
 
   async function handleLogin() {
     if (loading) return;
@@ -71,18 +82,26 @@ export default function LoginPage() {
         data?.user?.epicConnected ??
         !!data?.user?.epicId;
 
-      setTimeout(() => {
-        if (!epicConnected) {
-          router.replace("/connect-epic");
-        } else {
-          router.replace("/dashboard");
-        }
-      }, 500);
+      hasRedirectedRef.current = true;
+
+      if (epicConnected === false) {
+        router.replace("/connect-epic");
+      } else {
+        router.replace("/dashboard");
+      }
     } catch (error) {
       console.error(error);
       setMessage("Erro de conexão com servidor");
       setLoading(false);
     }
+  }
+
+  if (checkingSession) {
+    return (
+      <div className="min-h-screen bg-zinc-950 text-white flex items-center justify-center">
+        <div className="text-white/70 text-lg">Verificando sessão...</div>
+      </div>
+    );
   }
 
   return (

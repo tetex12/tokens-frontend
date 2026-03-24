@@ -1,25 +1,28 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Brand } from "@/components/Brand";
 import { useAuth } from "../../src/components/context/AuthContext";
 
 export default function DashboardPage() {
-  const { isAuthenticated, logout } = useAuth();
+  const { logout } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isChecking, setIsChecking] = useState(true);
+  const hasBootstrappedRef = useRef(false);
 
   useEffect(() => {
+    if (hasBootstrappedRef.current) return;
+    hasBootstrappedRef.current = true;
+
     async function bootstrapDashboard() {
       try {
         const tokenFromUrl = searchParams.get("access_token");
 
         if (tokenFromUrl) {
           localStorage.setItem("token", tokenFromUrl);
-          router.replace("/dashboard");
-          return;
+          window.history.replaceState({}, "", "/dashboard");
         }
 
         const token = localStorage.getItem("token");
@@ -39,16 +42,22 @@ export default function DashboardPage() {
         );
 
         if (!res.ok) {
-          localStorage.removeItem("token");
-          router.replace("/login");
+          console.error("Erro ao buscar /users/me:", res.status);
+
+          if (res.status === 401) {
+            localStorage.removeItem("token");
+            router.replace("/login");
+            return;
+          }
+
+          setIsChecking(false);
           return;
         }
 
         const data = await res.json().catch(() => null);
 
         if (!data) {
-          localStorage.removeItem("token");
-          router.replace("/login");
+          setIsChecking(false);
           return;
         }
 
@@ -56,16 +65,15 @@ export default function DashboardPage() {
           data?.epicConnected ??
           !!data?.epicId;
 
-        if (!epicConnected) {
+        if (epicConnected === false) {
           router.replace("/connect-epic");
           return;
         }
 
         setIsChecking(false);
       } catch (error) {
-        console.error("Erro verificando Epic:", error);
-        localStorage.removeItem("token");
-        router.replace("/login");
+        console.error("Erro verificando dashboard:", error);
+        setIsChecking(false);
       }
     }
 
@@ -78,10 +86,10 @@ export default function DashboardPage() {
         ? localStorage.getItem("token")
         : null;
 
-    if (!token && !isAuthenticated) {
+    if (!token && !isChecking) {
       router.replace("/login");
     }
-  }, [isAuthenticated, router]);
+  }, [isChecking, router]);
 
   if (isChecking) {
     return (

@@ -1,26 +1,32 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Brand } from "@/components/Brand";
-import { useAuth } from "../../src/components/context/AuthContext";
 
 export default function ConnectEpicPage() {
   const router = useRouter();
-  const { isAuthenticated } = useAuth();
+  const hasCheckedSessionRef = useRef(false);
   const [loading, setLoading] = useState(false);
+  const [checkingSession, setCheckingSession] = useState(true);
   const [message, setMessage] = useState("");
 
   useEffect(() => {
+    if (hasCheckedSessionRef.current) return;
+    hasCheckedSessionRef.current = true;
+
     const token =
       typeof window !== "undefined"
         ? localStorage.getItem("token")
         : null;
 
-    if (!token && !isAuthenticated) {
+    if (!token) {
       router.replace("/login");
+      return;
     }
-  }, [isAuthenticated, router]);
+
+    setCheckingSession(false);
+  }, [router]);
 
   async function connectEpic() {
     if (loading) return;
@@ -50,6 +56,12 @@ export default function ConnectEpicPage() {
       const data = await res.json().catch(() => null);
 
       if (!res.ok) {
+        if (res.status === 401) {
+          localStorage.removeItem("token");
+          router.replace("/login");
+          return;
+        }
+
         setMessage(data?.message || "Erro ao iniciar conexão com a Epic");
         setLoading(false);
         return;
@@ -68,6 +80,14 @@ export default function ConnectEpicPage() {
       setMessage("Erro ao iniciar OAuth Epic");
       setLoading(false);
     }
+  }
+
+  if (checkingSession) {
+    return (
+      <div className="min-h-screen bg-zinc-950 text-white flex items-center justify-center">
+        <div className="text-white/70 text-lg">Verificando sessão...</div>
+      </div>
+    );
   }
 
   return (

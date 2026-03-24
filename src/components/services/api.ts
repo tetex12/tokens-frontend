@@ -4,7 +4,6 @@ export async function apiFetch(
   endpoint: string,
   options: RequestInit = {}
 ) {
-
   const token =
     typeof window !== "undefined"
       ? localStorage.getItem("token")
@@ -24,7 +23,14 @@ export async function apiFetch(
   const data = await res.json().catch(() => null);
 
   if (!res.ok) {
-    throw new Error(data?.message || "API error");
+    if (res.status === 401 && typeof window !== "undefined") {
+      localStorage.removeItem("token");
+    }
+
+    const error = new Error(data?.message || "API error");
+    (error as any).status = res.status;
+    (error as any).data = data;
+    throw error;
   }
 
   return data;
